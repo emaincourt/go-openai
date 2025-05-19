@@ -134,15 +134,15 @@ func (c *Client) CreateImage(ctx context.Context, request ImageRequest) (respons
 
 // ImageEditRequest represents the request structure for the image API.
 type ImageEditRequest struct {
-	Image          *os.File `json:"image,omitempty"`
-	Mask           *os.File `json:"mask,omitempty"`
-	Prompt         string   `json:"prompt,omitempty"`
-	Model          string   `json:"model,omitempty"`
-	N              int      `json:"n,omitempty"`
-	Size           string   `json:"size,omitempty"`
-	ResponseFormat string   `json:"response_format,omitempty"`
-	Quality        string   `json:"quality,omitempty"`
-	User           string   `json:"user,omitempty"`
+	Images         []*os.File `json:"image,omitempty"`
+	Mask           *os.File   `json:"mask,omitempty"`
+	Prompt         string     `json:"prompt,omitempty"`
+	Model          string     `json:"model,omitempty"`
+	N              int        `json:"n,omitempty"`
+	Size           string     `json:"size,omitempty"`
+	ResponseFormat string     `json:"response_format,omitempty"`
+	Quality        string     `json:"quality,omitempty"`
+	User           string     `json:"user,omitempty"`
 }
 
 // CreateEditImage - API call to create an image. This is the main endpoint of the DALL-E API.
@@ -150,10 +150,12 @@ func (c *Client) CreateEditImage(ctx context.Context, request ImageEditRequest) 
 	body := &bytes.Buffer{}
 	builder := c.createFormBuilder(body)
 
-	// image
-	err = builder.CreateFormFile("image", request.Image)
-	if err != nil {
-		return
+	// images
+	for _, image := range request.Images {
+		err = builder.CreateFormFile("image[]", image)
+		if err != nil {
+			return
+		}
 	}
 
 	// mask, it is optional
